@@ -4,23 +4,94 @@ class connect4:
     height = 0
     board = []
     def __init__(self,boardwidth,boardheight):
-        self.width = boardwidth
-        self.height = boardheight
-        self.board = chess[boardheight][boardwidth]
-        for i in range(0,boardheight):
-            for j in range(0,boardwidth):
-                chess[i][j] = chess(0)
-    
-    def check_connect_four(self):
-        pass
-
+        if( boardheight >= 4 and boardwidth>=4 ):
+            self.width = boardwidth
+            self.height = boardheight
+            self.board = chess[boardheight][boardwidth]
+            for i in range(0,boardheight):
+                for j in range(0,boardwidth):
+                    chess[i][j] = chess(0)
+        else:
+            print("size of the board should be greater than 4 x 4")
+     
     def put_chess(self, state, col):
         pos = 0
         while pos < self.height:
-            if chess[col][pos].get_state !=0:
-                chess[col][pos-1].set_state(state)
+            if chess[pos][col].get_state !=0:
+                if pos !=0:
+                    chess[pos-1][col].set_state(state)
+                    break
+                else:
+                    print("select a new location, the col is full")
             else:
                 pos += 1
+        
+        pos += 1
+
+        for i in range(1,4):
+            if pos+i > 0 and pos+i < self.height:
+                if chess[pos+i][col].get_state ==state:
+                    if i == 3 :
+                        return [True,state]
+                    continue
+                else:
+                    break
+        for i in range(1,4):
+            if col+i > 0 and col+i < self.width:
+                if chess[pos][col+i].get_state == state:
+                    if i == 3 :
+                        return [True,state]
+                    continue
+                else:
+                    break
+        for i in range(1,4):
+            if col-i > 0 and col-i < self.width:
+                if chess[pos][col-i].get_state == state:
+                    if i == 3 :
+                        return [True,state]
+                    continue
+                else:
+                    break
+
+        for i in range(1,4):
+            if col-i > 0 and col-i < self.width and pos+i > 0 and pos+i < self.height:
+                if chess[pos+i][col-i].get_state == state:
+                    if i == 3 :
+                        return [True,state]
+                    continue
+                else:
+                    break
+
+        for i in range(1,4):
+            if col+i > 0 and col+i < self.width and pos+i > 0 and pos+i < self.height:
+                if chess[pos+i][col+i].get_state == state:
+                    if i == 3 :
+                        return [True,state]
+                    continue
+                else:
+                    break
+
+        for i in range(1,4):
+            if col+i > 0 and col+i < self.width and pos-i > 0 and pos-i < self.height:
+                if chess[pos-i][col+i].get_state == state:
+                    if i == 3 :
+                        return [True,state]
+                    continue
+                else:
+                    break
+
+        for i in range(1,4):
+            if col-i > 0 and col-i < self.width and pos-i > 0 and pos-i < self.height:
+                if chess[pos-i][col-i].get_state == state:
+                    if i == 3 :
+                        return [True,state]
+                    continue
+                else:
+                    break
+        
+
+        return [False,state]
+    
 
 class chess:
     state = 0
