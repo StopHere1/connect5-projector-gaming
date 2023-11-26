@@ -34,9 +34,15 @@ class connect4:
     def put_chess(self, state, col):
         pos = 0
         while pos < self.height:
-            if chess[pos][col].get_state !=0:
+            if chess[pos][col].get_state != 0 or pos == self.height - 1:
                 if pos !=0:
-                    chess[pos-1][col].set_state(state)
+                    if pos == self.height - 1:
+                        if chess[pos][col].get_state != 0:
+                            chess[pos-1][col].set_state(state)
+                        else:
+                            chess[pos][col].set_state(state)
+                    else:
+                        chess[pos-1][col].set_state(state)
                     break
                 else:
                     print("select a new location, the col is full")
