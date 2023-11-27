@@ -27,8 +27,11 @@ def print_result(result: GestureRecognizerResult, output_image: mp.Image, timest
         # checking for a certain case
         print([category.category_name for category in gesture]==['Thumb_Up'])
 
-
-base_options = BaseOptions(model_asset_path='gesture_recognizer.task')
+model_file = open('gesture_recognizer.task', "rb")
+model_data = model_file.read()
+model_file.close()
+base_options = BaseOptions(model_asset_buffer=model_data)
+# base_options = BaseOptions(model_asset_path='gesture_recognizer.task')
 options = GestureRecognizerOptions(base_options=base_options, running_mode = VisionRunningMode.LIVE_STREAM,result_callback=print_result)
 recognizer = GestureRecognizer.create_from_options(options)
 
