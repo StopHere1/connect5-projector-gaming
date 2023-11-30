@@ -32,7 +32,7 @@ model_data = model_file.read()
 model_file.close()
 base_options = BaseOptions(model_asset_buffer=model_data)
 # base_options = BaseOptions(model_asset_path='gesture_recognizer.task')
-options = GestureRecognizerOptions(base_options=base_options, running_mode = VisionRunningMode.LIVE_STREAM,result_callback=print_result)
+options = GestureRecognizerOptions(base_options=base_options, running_mode = VisionRunningMode.LIVE_STREAM,result_callback=print_result,num_hands=2)
 recognizer = GestureRecognizer.create_from_options(options)
 
 class handDetector():
@@ -66,7 +66,7 @@ class handDetector():
                 if draw:
                     cv2.circle(img, (cx, cy), 3, (255, 0, 255), cv2.FILLED)
         return lmlist
-
+    
 # start video stream
 capture = cv2.VideoCapture(cameraId) 
 cv2.namedWindow('capture', cv2.WINDOW_NORMAL)  # open a window to show
@@ -97,7 +97,6 @@ while capture.isOpened():
                             # print(cx,cy)
                             cv2.circle(frame, (cx,cy), 3, (255,0,255), cv2.FILLED)
                     mpDraw.draw_landmarks(frame, handLms, mpHands.HAND_CONNECTIONS)
-                    
         # cTime = time.time()
         # fps = 1 / (cTime - pTime)
         # pTime = cTime
