@@ -90,11 +90,12 @@ while capture.isOpened():
             if results.multi_hand_landmarks:
                 for handLms in results.multi_hand_landmarks:
                     for id, lm in enumerate(handLms.landmark):
-                        #print(id,lm)
-                        h, w, c = frame.shape
-                        cx, cy = int(lm.x *w), int(lm.y*h)
-                        #if id ==0:
-                        cv2.circle(frame, (cx,cy), 3, (255,0,255), cv2.FILLED)
+                        if id == 8:
+                            h, w, c = frame.shape
+                            cx, cy = int(lm.x *w), int(lm.y*h)
+                            #if id ==0:
+                            # print(cx,cy)
+                            cv2.circle(frame, (cx,cy), 3, (255,0,255), cv2.FILLED)
                     mpDraw.draw_landmarks(frame, handLms, mpHands.HAND_CONNECTIONS)
                     
         # cTime = time.time()
