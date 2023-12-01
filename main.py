@@ -6,6 +6,11 @@ import time
 cameraId = 0 # give a specific camera id connected to the computer
 connect4game = connect4.connect4(10,7) #testing class connection
 
+slideWindowCounter = 0
+pointUpCounter = 0
+thumbUpCounter = 0
+thumbDownCounter = 0
+openPalmCounter = 0
 
 mpHands = mp.solutions.hands
 hands = mpHands.Hands(static_image_mode=False,
@@ -23,9 +28,46 @@ VisionRunningMode = mp.tasks.vision.RunningMode
 
 def print_result(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
     print(result.gestures)
+    global thumbDownCounter
+    global thumbUpCounter
+    global openPalmCounter
+    global pointUpCounter
+    global slideWindowCounter
+
     for gesture in result.gestures:
         # checking for a certain case
-        print([category.category_name for category in gesture]==['Thumb_Up'])
+        if [category.category_name for category in gesture]==['Thumb_Up'] :
+            thumbUpCounter += 1
+        elif [category.category_name for category in gesture]==['Thumb_Down']:
+            thumbDownCounter += 1
+        elif [category.category_name for category in gesture]==['Open_Palm']:
+            openPalmCounter +=1
+        elif [category.category_name for category in gesture]==['Pointing_Up']:
+            pointUpCounter +=1
+        
+        # window counter ++
+        slideWindowCounter+=1
+
+        # output
+        if slideWindowCounter == 15:
+            if thumbUpCounter>thumbDownCounter and thumbUpCounter>pointUpCounter and thumbUpCounter > openPalmCounter:
+                print("Thumb_Up")
+            elif thumbDownCounter>thumbUpCounter and thumbDownCounter>openPalmCounter and thumbDownCounter>pointUpCounter:
+                print("Thumb_Down")
+            elif openPalmCounter>thumbDownCounter and openPalmCounter > thumbUpCounter and openPalmCounter > pointUpCounter:
+                print("Open_Palm")
+            elif pointUpCounter>thumbDownCounter and pointUpCounter>thumbUpCounter and pointUpCounter>openPalmCounter:
+                print("Point_up")
+            else:
+                print("None")
+
+            # reset counter
+            slideWindowCounter=0
+            thumbUpCounter=0
+            thumbDownCounter=0
+            openPalmCounter=0
+            pointUpCounter=0
+    # print([category.category_name for category in gesture]==['Thumb_Up'])
 
 model_file = open('gesture_recognizer.task', "rb")
 model_data = model_file.read()
