@@ -2,11 +2,10 @@ class chess:
     state = 0
     def __init__(self,state):
         self.state=state
-        
 
     def get_state(self):
         return self.state
-    
+
     def set_state(self,state):
         if state == 0 or state == 1 or state ==2:
             self.state = state
@@ -26,9 +25,13 @@ class connect4:
             self.pre_position=[0,0] 
         else:
             print("size of the board should be greater than 4 x 4")
-   
-   
-   
+    
+    def get_width(self):
+        return self.width
+    
+    def get_height(self):
+        return self.height
+    
     def get_pre_position(self):
         return self.pre_position
     
@@ -38,33 +41,34 @@ class connect4:
         
     def regret(self):
         x_cor, y_cor = self.get_pre_position
-        self.board[x_cor][y_cor].set_state(0)    
+        self.board[x_cor][y_cor].set_state(0)  
     
-    
-    def get_width(self):
-        return self.width
-    
-    def get_height(self):
-        return self.height
-        
     def put_chess(self, state, col):
         pos = 0
         while pos < self.height:
-            if chess[pos][col].get_state !=0:
+            if self.board[pos][col].get_state != 0 or pos == self.height - 1:
                 if pos !=0:
-                    chess[pos-1][col].set_state(state)
-                    self.set_pre_position(pos-1,col)
+                    if pos == self.height - 1:
+                        if self.board[pos][col].get_state != 0:
+                            self.board[pos-1][col].set_state(state)
+                            self.set_pre_position(pos-1,col)
+                        else:
+                            self.board[pos][col].set_state(state)
+                            self.set_pre_position(pos,col)
+                    else:
+                        self.board[pos-1][col].set_state(state)
+                        self.set_pre_position(pos-1,col)
                     break
                 else:
                     print("select a new location, the col is full")
             else:
                 pos += 1
-
+        
         pos += 1
 
         for i in range(1,4):
             if pos+i > 0 and pos+i < self.height:
-                if chess[pos+i][col].get_state ==state:
+                if self.board[pos+i][col].get_state ==state:
                     if i == 3 :
                         return [True,state]
                     continue
@@ -73,7 +77,7 @@ class connect4:
 
         for i in range(1,4):
             if col+i > 0 and col+i < self.width:
-                if chess[pos][col+i].get_state == state:
+                if self.board[pos][col+i].get_state == state:
                     if i == 3 :
                         return [True,state]
                     continue
@@ -82,7 +86,7 @@ class connect4:
 
         for i in range(1,4):
             if col-i > 0 and col-i < self.width:
-                if chess[pos][col-i].get_state == state:
+                if self.board[pos][col-i].get_state == state:
                     if i == 3 :
                         return [True,state]
                     continue
@@ -91,7 +95,7 @@ class connect4:
                 
         for i in range(1,4):
             if col-i > 0 and col-i < self.width and pos+i > 0 and pos+i < self.height:
-                if chess[pos+i][col-i].get_state == state:
+                if self.board[pos+i][col-i].get_state == state:
                     if i == 3 :
                         return [True,state]
                     continue
@@ -100,7 +104,7 @@ class connect4:
 
         for i in range(1,4):
             if col+i > 0 and col+i < self.width and pos+i > 0 and pos+i < self.height:
-                if chess[pos+i][col+i].get_state == state:
+                if self.board[pos+i][col+i].get_state == state:
                     if i == 3 :
                         return [True,state]
                     continue
@@ -109,7 +113,7 @@ class connect4:
 
         for i in range(1,4):
             if col+i > 0 and col+i < self.width and pos-i > 0 and pos-i < self.height:
-                if chess[pos-i][col+i].get_state == state:
+                if self.board[pos-i][col+i].get_state == state:
                     if i == 3 :
                         return [True,state]
                     continue
@@ -118,7 +122,7 @@ class connect4:
 
         for i in range(1,4):
             if col-i > 0 and col-i < self.width and pos-i > 0 and pos-i < self.height:
-                if chess[pos-i][col-i].get_state == state:
+                if self.board[pos-i][col-i].get_state == state:
                     if i == 3 :
                         return [True,state]
                     continue
