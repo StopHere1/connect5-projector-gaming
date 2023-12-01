@@ -64,11 +64,6 @@ class connect4:
                         self.board[pos-1][col].set_state(state)
                         self.set_pre_position(pos-1,col)
 
-                        else:
-                            self.board[pos][col].set_state(state)
-                    else:
-                        self.board[pos-1][col].set_state(state)
-
                     break
                 else:
                     print("select a new location, the col is full")
