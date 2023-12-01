@@ -18,6 +18,7 @@ class connect4:
     width = 0
     height = 0
     board = []
+    nChessGet = 0
     current_turn = 1  # 1 for player 1, 2 for player 2
 
     def __init__(self, board_width, board_height):
@@ -42,7 +43,11 @@ class connect4:
     def get_height(self):
         return self.height
 
+    def check_draw(self):
+        return self.nChessGet == self.width*self.height
+    
     def put_chess(self, col):
+        
         pos = 0
         record = 9
         while pos < self.height:
@@ -51,15 +56,18 @@ class connect4:
                     if pos == self.height - 1:
                         if self.board[col][pos].get_state() != 0:
                             self.board[col][pos - 1].set_state(self.current_turn)
+                            self.nChessGet += 1
                         else:
                             record = self.board[col][pos - 1].get_state()
                             self.board[col][pos].set_state(self.current_turn)
+                            self.nChessGet += 1
                     else:
                         self.board[col][pos - 1].set_state(self.current_turn)
+                        self.nChessGet += 1
                     break
                 else:
                     print("Select a new location, the column is full")
-                    self.change_turn()
+                    self.change_turn() # in case of the chess is not put to the board the turn shouldn't change
                     break
             else:
                 pos += 1
@@ -96,7 +104,11 @@ class connect4:
             if col+i<self.width and col-3+i>=0 and pos+i<self.height and pos-3+i>=0:
                 if self.board[col+i][pos+i].get_state() == self.current_turn and self.board[col-1+i][pos-1+i].get_state() == self.current_turn and self.board[col-2+i][pos-2+i].get_state() == self.current_turn and self.board[col-3+i][pos-3+i].get_state() == self.current_turn:
                     return True
-                
-
+                 
         self.change_turn()  # Change turn after putting a chess
         return False
+
+    def restart(self):
+        self.board = [[Chess(0) for _ in range(self.height)] for _ in range(self.width)]
+        self.pre_position = [0, 0]
+        self.current_turn = 1

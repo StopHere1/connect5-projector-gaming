@@ -112,8 +112,7 @@ class handDetector():
 # start video stream
 capture = cv2.VideoCapture(cameraId) 
 cv2.namedWindow('capture', cv2.WINDOW_NORMAL)  # open a window to show
-# pTime = 0
-# cTime = 0
+
 detector = handDetector()
 timestamp = 0
 while capture.isOpened():

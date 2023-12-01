@@ -88,6 +88,9 @@ class Connect4GUI:
             cv2.waitKey(0)
             cv2.destroyAllWindows()
             exit()
+        elif self.connect4_game.check_draw():
+            print("it's a draw")
+            self.connect4_game.restart()
 
 if __name__ == "__main__":
     # Initialize the Connect4 game
