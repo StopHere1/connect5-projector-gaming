@@ -75,10 +75,10 @@ class connect4:
             else:
                 pos += 1
         
-        pos += 1
+        pos -= 1
 
         for i in range(1,4):
-            if pos+i > 0 and pos+i < self.height:
+            if pos+i >= 0 and pos+i < self.height:
                 if self.board[pos+i][col].get_state ==state:
                     if i == 3 :
                         return [True,state]
@@ -87,7 +87,7 @@ class connect4:
                     break
 
         for i in range(1,4):
-            if col+i > 0 and col+i < self.width:
+            if col+i >= 0 and col+i < self.width:
                 if self.board[pos][col+i].get_state == state:
                     if i == 3 :
                         return [True,state]
@@ -96,7 +96,7 @@ class connect4:
                     break
 
         for i in range(1,4):
-            if col-i > 0 and col-i < self.width:
+            if col-i >= 0 and col-i < self.width:
                 if self.board[pos][col-i].get_state == state:
                     if i == 3 :
                         return [True,state]
@@ -105,7 +105,7 @@ class connect4:
                     break
                 
         for i in range(1,4):
-            if col-i > 0 and col-i < self.width and pos+i > 0 and pos+i < self.height:
+            if col-i >= 0 and col-i < self.width and pos+i >= 0 and pos+i < self.height:
                 if self.board[pos+i][col-i].get_state == state:
                     if i == 3 :
                         return [True,state]
@@ -114,7 +114,7 @@ class connect4:
                     break
 
         for i in range(1,4):
-            if col+i > 0 and col+i < self.width and pos+i > 0 and pos+i < self.height:
+            if col+i >= 0 and col+i < self.width and pos+i >= 0 and pos+i < self.height:
                 if self.board[pos+i][col+i].get_state == state:
                     if i == 3 :
                         return [True,state]
@@ -123,7 +123,7 @@ class connect4:
                     break
 
         for i in range(1,4):
-            if col+i > 0 and col+i < self.width and pos-i > 0 and pos-i < self.height:
+            if col+i >= 0 and col+i < self.width and pos-i >= 0 and pos-i < self.height:
                 if self.board[pos-i][col+i].get_state == state:
                     if i == 3 :
                         return [True,state]
@@ -132,7 +132,7 @@ class connect4:
                     break
 
         for i in range(1,4):
-            if col-i > 0 and col-i < self.width and pos-i > 0 and pos-i < self.height:
+            if col-i >= 0 and col-i < self.width and pos-i >= 0 and pos-i < self.height:
                 if self.board[pos-i][col-i].get_state == state:
                     if i == 3 :
                         return [True,state]
