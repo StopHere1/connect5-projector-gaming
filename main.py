@@ -1,13 +1,16 @@
 import connect4
 import cv2
 import mediapipe as mp
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
 import time
 
 cameraId = 0 # give a specific camera id connected to the computer
 connect4game = connect4.connect4(10,7) #testing class connection
 
+slideWindowCounter = 0
+pointUpCounter = 0
+thumbUpCounter = 0
+thumbDownCounter = 0
+openPalmCounter = 0
 
 mpHands = mp.solutions.hands
 hands = mpHands.Hands(static_image_mode=False,
@@ -15,6 +18,7 @@ hands = mpHands.Hands(static_image_mode=False,
                       min_detection_confidence=0.5,
                       min_tracking_confidence=0.5)
 mpDraw = mp.solutions.drawing_utils
+
 BaseOptions = mp.tasks.BaseOptions
 GestureRecognizer = mp.tasks.vision.GestureRecognizer
 GestureRecognizerOptions = mp.tasks.vision.GestureRecognizerOptions
@@ -24,17 +28,54 @@ VisionRunningMode = mp.tasks.vision.RunningMode
 
 def print_result(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
     print(result.gestures)
+    global thumbDownCounter
+    global thumbUpCounter
+    global openPalmCounter
+    global pointUpCounter
+    global slideWindowCounter
+
     for gesture in result.gestures:
-        print([category.category_name for category in gesture])
-    # print('gesture recognition result: {}'.format(result))
-    
-    
+        # checking for a certain case
+        if [category.category_name for category in gesture]==['Thumb_Up'] :
+            thumbUpCounter += 1
+        elif [category.category_name for category in gesture]==['Thumb_Down']:
+            thumbDownCounter += 1
+        elif [category.category_name for category in gesture]==['Open_Palm']:
+            openPalmCounter +=1
+        elif [category.category_name for category in gesture]==['Pointing_Up']:
+            pointUpCounter +=1
+        
+        # window counter ++
+        slideWindowCounter+=1
+
+        # output
+        if slideWindowCounter == 15:
+            if thumbUpCounter>thumbDownCounter and thumbUpCounter>pointUpCounter and thumbUpCounter > openPalmCounter:
+                print("Thumb_Up")
+            elif thumbDownCounter>thumbUpCounter and thumbDownCounter>openPalmCounter and thumbDownCounter>pointUpCounter:
+                print("Thumb_Down")
+            elif openPalmCounter>thumbDownCounter and openPalmCounter > thumbUpCounter and openPalmCounter > pointUpCounter:
+                print("Open_Palm")
+            elif pointUpCounter>thumbDownCounter and pointUpCounter>thumbUpCounter and pointUpCounter>openPalmCounter:
+                print("Point_up")
+            else:
+                print("None")
+
+            # reset counter
+            slideWindowCounter=0
+            thumbUpCounter=0
+            thumbDownCounter=0
+            openPalmCounter=0
+            pointUpCounter=0
+    # print([category.category_name for category in gesture]==['Thumb_Up'])
+
 model_file = open('gesture_recognizer.task', "rb")
 model_data = model_file.read()
 model_file.close()
-base_options = python.BaseOptions(model_asset_buffer=model_data)
-options = vision.GestureRecognizerOptions(base_options=base_options, running_mode = VisionRunningMode.LIVE_STREAM,result_callback=print_result)
-recognizer = vision.GestureRecognizer.create_from_options(options)
+base_options = BaseOptions(model_asset_buffer=model_data)
+# base_options = BaseOptions(model_asset_path='gesture_recognizer.task')
+options = GestureRecognizerOptions(base_options=base_options, running_mode = VisionRunningMode.LIVE_STREAM,result_callback=print_result,num_hands=2)
+recognizer = GestureRecognizer.create_from_options(options)
 
 class handDetector():
     def __init__(self, mode = False, maxHands = 2, detectionCon = 1, trackCon = 1):
@@ -67,12 +108,12 @@ class handDetector():
                 if draw:
                     cv2.circle(img, (cx, cy), 3, (255, 0, 255), cv2.FILLED)
         return lmlist
-
+    
 # start video stream
 capture = cv2.VideoCapture(cameraId) 
 cv2.namedWindow('capture', cv2.WINDOW_NORMAL)  # open a window to show
-pTime = 0
-cTime = 0
+# pTime = 0
+# cTime = 0
 detector = handDetector()
 timestamp = 0
 while capture.isOpened():
@@ -91,23 +132,22 @@ while capture.isOpened():
             if results.multi_hand_landmarks:
                 for handLms in results.multi_hand_landmarks:
                     for id, lm in enumerate(handLms.landmark):
-                        #print(id,lm)
-                        h, w, c = frame.shape
-                        cx, cy = int(lm.x *w), int(lm.y*h)
-                        #if id ==0:
-                        cv2.circle(frame, (cx,cy), 3, (255,0,255), cv2.FILLED)
+                        if id == 8:
+                            h, w, c = frame.shape
+                            cx, cy = int(lm.x *w), int(lm.y*h)
+                            #if id ==0:
+                            # print(cx,cy)
+                            cv2.circle(frame, (cx,cy), 3, (255,0,255), cv2.FILLED)
                     mpDraw.draw_landmarks(frame, handLms, mpHands.HAND_CONNECTIONS)
-                    
-        cTime = time.time()
-        fps = 1 / (cTime - pTime)
-        pTime = cTime
-        cv2.putText(frame, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
+        # cTime = time.time()
+        # fps = 1 / (cTime - pTime)
+        # pTime = cTime
+        # cv2.putText(frame, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
         cv2.imshow('camera', frame)  # show the frame
         cv2.waitKey(1)
 
-
+        
 # clear up
 capture.release()
 cv2.destroyAllWindows()
-
 
