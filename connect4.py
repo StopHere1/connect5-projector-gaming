@@ -22,6 +22,9 @@ class connect4:
             self.width = boardwidth
             self.height = boardheight
             self.board = [[chess(0) for i in range(boardheight)] for j in range(boardwidth)]
+
+            self.pre_position=[0,0] 
+
         else:
             print("size of the board should be greater than 4 x 4")
     
@@ -31,6 +34,19 @@ class connect4:
     def get_height(self):
         return self.height
     
+
+    def get_pre_position(self):
+        return self.pre_position
+    
+    def set_pre_position(self,x_cor,y_cor):
+        # Take x and y coordinate as input
+        self.pre_position = [x_cor,y_cor]
+        
+    def regret(self):
+        x_cor, y_cor = self.get_pre_position
+        self.board[x_cor][y_cor].set_state(0)  
+    
+
     def put_chess(self, state, col):
         pos = 0
         while pos < self.height:
@@ -39,10 +55,20 @@ class connect4:
                     if pos == self.height - 1:
                         if self.board[pos][col].get_state != 0:
                             self.board[pos-1][col].set_state(state)
+
+                            self.set_pre_position(pos-1,col)
+                        else:
+                            self.board[pos][col].set_state(state)
+                            self.set_pre_position(pos,col)
+                    else:
+                        self.board[pos-1][col].set_state(state)
+                        self.set_pre_position(pos-1,col)
+
                         else:
                             self.board[pos][col].set_state(state)
                     else:
                         self.board[pos-1][col].set_state(state)
+
                     break
                 else:
                     print("select a new location, the col is full")
@@ -116,7 +142,4 @@ class connect4:
         
 
         return [False,state]
-    
-
-
     
