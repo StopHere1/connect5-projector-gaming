@@ -45,6 +45,14 @@ class Connect4GUI:
         cv2.imshow(self.window_name, self.board_image)
 
     # [Testing] Mouse event for testing game's logic
+    def pointting_up_track(self, cx):
+        col = cx // 200
+        self.next_move_col = col
+        self.draw_board()
+    
+    def thumb_up_event(self):
+        self.test_game_logic(self.next_move_col)
+
     def mouse_event(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             col = x // self.square_size
@@ -107,7 +115,7 @@ class Connect4GUI:
             cv2.imshow(self.window_name, self.board_image)
             cv2.waitKey(3000)
 
-            cv2.destroyAllWindows()
+            # cv2.destroyAllWindows()
 
             self.connect4_game.restart()  # Restart the game
 
@@ -135,7 +143,7 @@ class Connect4GUI:
             cv2.imshow(self.window_name, self.board_image)
             cv2.waitKey(3000)
 
-            cv2.destroyAllWindows()
+            # cv2.destroyAllWindows()
 
             self.connect4_game.restart()
 
@@ -149,6 +157,9 @@ class Connect4GUI:
             # Set the mouse callback for the new instance
             self.next_move_col = self.connect4_game.get_width() // 2
             self.draw_board()
+
+def pointting_handler():
+    print("pointting up handler from gui!")
 
 if __name__ == "__main__":
     # Initialize the Connect4 game

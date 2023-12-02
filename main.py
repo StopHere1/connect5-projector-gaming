@@ -2,9 +2,11 @@ import connect4
 import cv2
 import mediapipe as mp
 import time
+import connect4_gui
 
 cameraId = 0 # give a specific camera id connected to the computer
-connect4game = connect4.connect4(10,7) #testing class connection
+connect4game = connect4.connect4(7,6) #testing class connection
+GUI = connect4_gui.Connect4GUI(connect4game)
 
 slideWindowCounter = 0
 pointUpCounter = 0
@@ -25,6 +27,7 @@ GestureRecognizerOptions = mp.tasks.vision.GestureRecognizerOptions
 GestureRecognizerResult = mp.tasks.vision.GestureRecognizerResult
 VisionRunningMode = mp.tasks.vision.RunningMode
 
+last_result = 0
 
 def print_result(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
     print(result.gestures)
@@ -33,6 +36,7 @@ def print_result(result: GestureRecognizerResult, output_image: mp.Image, timest
     global openPalmCounter
     global pointUpCounter
     global slideWindowCounter
+    global last_result
 
     for gesture in result.gestures:
         # checking for a certain case
@@ -44,6 +48,7 @@ def print_result(result: GestureRecognizerResult, output_image: mp.Image, timest
             openPalmCounter +=1
         elif [category.category_name for category in gesture]==['Pointing_Up']:
             pointUpCounter +=1
+            GUI.pointting_up_track(cx-260)
         
         # window counter ++
         slideWindowCounter+=1
@@ -52,12 +57,22 @@ def print_result(result: GestureRecognizerResult, output_image: mp.Image, timest
         if slideWindowCounter == 15:
             if thumbUpCounter>thumbDownCounter and thumbUpCounter>pointUpCounter and thumbUpCounter > openPalmCounter:
                 print("Thumb_Up")
+                if last_result!=1:
+                    last_result = 1
+                    GUI.thumb_up_event()
             elif thumbDownCounter>thumbUpCounter and thumbDownCounter>openPalmCounter and thumbDownCounter>pointUpCounter:
                 print("Thumb_Down")
+                if last_result!=2:
+                    last_result = 2
+                    
             elif openPalmCounter>thumbDownCounter and openPalmCounter > thumbUpCounter and openPalmCounter > pointUpCounter:
                 print("Open_Palm")
             elif pointUpCounter>thumbDownCounter and pointUpCounter>thumbUpCounter and pointUpCounter>openPalmCounter:
                 print("Point_up")
+                if last_result!=0:
+                    last_result = 0
+                    
+                
             else:
                 print("None")
 
@@ -112,13 +127,13 @@ class handDetector():
 # start video stream
 capture = cv2.VideoCapture(cameraId) 
 cv2.namedWindow('capture', cv2.WINDOW_NORMAL)  # open a window to show
-
 detector = handDetector()
 timestamp = 0
 while capture.isOpened():
     ret, frame = capture.read()
     if ret:
         if frame is not None:
+            
             frameRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             results = hands.process(frameRGB)
             frame = detector.findHands(frame)
@@ -134,13 +149,13 @@ while capture.isOpened():
                         if id == 8:
                             h, w, c = frame.shape
                             cx, cy = int(lm.x *w), int(lm.y*h)
+                            # print(cx)
                             cv2.circle(frame, (cx,cy), 3, (255,0,255), cv2.FILLED)
                     mpDraw.draw_landmarks(frame, handLms, mpHands.HAND_CONNECTIONS)
-            
-        # cTime = time.time()
-        # fps = 1 / (cTime - pTime)
-        # pTime = cTime
-        # cv2.putText(frame, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
+        
+        
+        key = cv2.waitKey(1)
+        GUI.draw_board()
         cv2.imshow('camera', frame)  # show the frame
         cv2.waitKey(1)
 
