@@ -10,6 +10,7 @@ class Connect4GUI:
         self.square_size = 100
         self.window_name = 'Virtual Connect 4'
         self.board_image = np.ones((connect4_game.get_height() * self.square_size, connect4_game.get_width() * self.square_size, 3), np.uint8)  # Initialize board_image
+        self.next_move_col = connect4_game.get_width() // 2
         cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
         cv2.setMouseCallback(self.window_name, self.mouse_event)
 
@@ -33,6 +34,14 @@ class Connect4GUI:
                                (int((top_left[0] + bottom_right[0]) / 2), int((top_left[1] + bottom_right[1]) / 2)),
                                int(self.square_size / 2), (255, 255, 255), -1)  # White for empty
 
+        # Determine the color for the next move indicator
+        next_player_color = (0, 0, 255) if self.connect4_game.get_turn() == 1 else (
+        0, 255, 255)  # Red for player 1, Yellow for player 2
+
+        # Draw next move indicator with the next player's color
+        indicator_center = (self.next_move_col * self.square_size + int(self.square_size / 2), self.square_size // 4)
+        cv2.circle(self.board_image, indicator_center, int(self.square_size / 4), next_player_color, -1)
+
         cv2.imshow(self.window_name, self.board_image)
 
     # [Testing] Mouse event for testing game's logic
@@ -40,11 +49,46 @@ class Connect4GUI:
         if event == cv2.EVENT_LBUTTONDOWN:
             col = x // self.square_size
             self.test_game_logic(col)
+        elif event == cv2.EVENT_MOUSEMOVE:
+            col = x // self.square_size
+            self.next_move_col = col
+            self.draw_board()
+
+    # function to draw the winning move
+    def draw_winning_move(self, winner):
+        # draw the final win step
+        for row in range(self.connect4_game.get_height()):
+            for col in range(self.connect4_game.get_width()):
+                top_left = (col * self.square_size, row * self.square_size)
+                bottom_right = ((col + 1) * self.square_size, (row + 1) * self.square_size)
+
+                if self.connect4_game.board[col][row].get_state() == 1:
+                    cv2.circle(self.board_image,
+                               (int((top_left[0] + bottom_right[0]) / 2), int((top_left[1] + bottom_right[1]) / 2)),
+                               int(self.square_size / 2), (0, 0, 255), -1)  # Red for player 1
+                elif self.connect4_game.board[col][row].get_state() == 2:
+                    cv2.circle(self.board_image,
+                               (int((top_left[0] + bottom_right[0]) / 2), int((top_left[1] + bottom_right[1]) / 2)),
+                               int(self.square_size / 2), (0, 255, 255), -1)  # Yellow for player 2
+                else:
+                    cv2.circle(self.board_image,
+                               (int((top_left[0] + bottom_right[0]) / 2), int((top_left[1] + bottom_right[1]) / 2)),
+                               int(self.square_size / 2), (255, 255, 255), -1)  # White for empty
+
+    # function to draw the result message
+    def draw_result_message(self, message, text_color=(255, 255, 255)):
+
+        text_size = cv2.getTextSize(message, cv2.FONT_HERSHEY_PLAIN, 3, 3)[0]
+        text_x = (self.board_image.shape[1] - text_size[0]) // 2
+        text_y = (self.board_image.shape[0] + text_size[1]) // 6
+
+        cv2.putText(self.board_image, message, (text_x, text_y), cv2.FONT_HERSHEY_PLAIN, 3, text_color, 6)
+
 
     def test_game_logic(self, col):
         state = self.connect4_game.get_turn()
         if self.connect4_game.put_chess(col):
-        # if self.connect4_game.put_chess(state, col):
+            self.next_move_col = col
             winner = state
             text_color = (0, 0, 255) if winner == 1 else (0, 255, 255)  # Red for player 1, Yellow for player 2
 
@@ -52,45 +96,59 @@ class Connect4GUI:
 
             # Create a new board image to avoid overlapping with existing circles
             self.board_image = np.ones((self.connect4_game.get_height() * self.square_size,
-                                   self.connect4_game.get_width() * self.square_size, 3), np.uint8)
+                                        self.connect4_game.get_width() * self.square_size, 3), np.uint8)
 
-            # draw the final win step
-            for row in range(self.connect4_game.get_height()):
-                for col in range(self.connect4_game.get_width()):
-                    top_left = (col * self.square_size, row * self.square_size)
-                    bottom_right = ((col + 1) * self.square_size, (row + 1) * self.square_size)
-
-                    if self.connect4_game.board[col][row].get_state() == 1:
-                        cv2.circle(self.board_image,
-                                   (int((top_left[0] + bottom_right[0]) / 2), int((top_left[1] + bottom_right[1]) / 2)),
-                                   int(self.square_size / 2), (0, 0, 255), -1)  # Red for player 1
-                    elif self.connect4_game.board[col][row].get_state() == 2:
-                        cv2.circle(self.board_image,
-                                   (int((top_left[0] + bottom_right[0]) / 2), int((top_left[1] + bottom_right[1]) / 2)),
-                                   int(self.square_size / 2), (0, 255, 255), -1)  # Yellow for player 2
-                    else:
-                        cv2.circle(self.board_image,
-                                   (int((top_left[0] + bottom_right[0]) / 2), int((top_left[1] + bottom_right[1]) / 2)),
-                                   int(self.square_size / 2), (255, 255, 255), -1)  # White for empty
+            # Draw the winning move
+            self.draw_winning_move(winner)
 
             # Draw the winning message
-            text_size = cv2.getTextSize("Player " + str(winner) + " wins!", cv2.FONT_HERSHEY_PLAIN, 3, 3)[0]
-            text_x = (self.board_image.shape[1] - text_size[0]) // 2
-            text_y = (self.board_image.shape[0] + text_size[1]) // 6
+            self.draw_result_message("Player " + str(winner) + " wins!", text_color)
 
-            cv2.putText(self.board_image, "Player " + str(winner) + " wins!", (text_x, text_y), cv2.FONT_HERSHEY_PLAIN, 3, text_color, 6)
+            cv2.imshow(self.window_name, self.board_image)
+            cv2.waitKey(3000)
+
+            cv2.destroyAllWindows()
+
+            self.connect4_game.restart()  # Restart the game
 
             # Create a new Connect4GUI instance with the updated board
             updated_gui = Connect4GUI(self.connect4_game)
             updated_gui.board_image = self.board_image
 
-            cv2.imshow(self.window_name, self.board_image)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-            exit()
+            # Set the mouse callback for the new instance
+            cv2.setMouseCallback(self.window_name, self.mouse_event)
+
+            # Set the mouse callback for the new instance
+            self.next_move_col = self.connect4_game.get_width() // 2
+            self.draw_board()
+
         elif self.connect4_game.check_draw():
             print("it's a draw")
+
+            # Create a new board image to avoid overlapping with existing circles
+            self.board_image = np.ones((self.connect4_game.get_height() * self.square_size,
+                                        self.connect4_game.get_width() * self.square_size, 3), np.uint8)
+
+            # Draw the draw message
+            self.draw_result_message("It's a draw!")
+
+            cv2.imshow(self.window_name, self.board_image)
+            cv2.waitKey(3000)
+
+            cv2.destroyAllWindows()
+
             self.connect4_game.restart()
+
+            # Create a new Connect4GUI instance with the updated board
+            updated_gui = Connect4GUI(self.connect4_game)
+            updated_gui.board_image = self.board_image
+
+            # Set the mouse callback for the new instance
+            cv2.setMouseCallback(self.window_name, self.mouse_event)
+
+            # Set the mouse callback for the new instance
+            self.next_move_col = self.connect4_game.get_width() // 2
+            self.draw_board()
 
 if __name__ == "__main__":
     # Initialize the Connect4 game
@@ -107,3 +165,5 @@ if __name__ == "__main__":
 
         if key == 27:  # Esc key to exit
             break
+
+    cv2.destroyAllWindows()

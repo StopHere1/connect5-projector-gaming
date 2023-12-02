@@ -77,7 +77,6 @@ class connect4:
             pos = pos
         else:
             pos -= 1
-        
 
         # check for vertical win
         for i in range(1, 4):
