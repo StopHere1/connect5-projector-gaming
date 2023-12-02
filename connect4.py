@@ -110,5 +110,6 @@ class connect4:
 
     def restart(self):
         self.board = [[Chess(0) for _ in range(self.height)] for _ in range(self.width)]
+        self.nChessGet = 0
         self.pre_position = [0, 0]
         self.current_turn = 1
