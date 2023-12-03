@@ -9,8 +9,11 @@ class Connect4GUI:
         self.connect4_game = connect4_game
         self.square_size = 100
         self.window_name = 'Virtual Connect 4'
-        self.board_image = np.ones((connect4_game.get_height() * self.square_size, connect4_game.get_width() * self.square_size, 3), np.uint8)  # Initialize board_image
+        self.black_background = (0,0,0)
+        self.board_image = np.full((connect4_game.get_height()*self.square_size,connect4_game.get_width()*self.square_size,3),self.black_background,dtype=np.uint8)
+        # self.board_image = np.ones((connect4_game.get_height() * self.square_size, connect4_game.get_width() * self.square_size, 3), np.uint8)  # Initialize board_image
         self.next_move_col = connect4_game.get_width() // 2
+        self.not_move = 0
         cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
         cv2.setMouseCallback(self.window_name, self.mouse_event)
 
@@ -81,7 +84,7 @@ class Connect4GUI:
                 else:
                     cv2.circle(self.board_image,
                                (int((top_left[0] + bottom_right[0]) / 2), int((top_left[1] + bottom_right[1]) / 2)),
-                               int(self.square_size / 2), (255, 255, 255), -1)  # White for empty
+                               int(self.square_size / 2), (150, 150, 150), -1)  # White for empty
 
     # function to draw the result message
     def draw_result_message(self, message, text_color=(255, 255, 255)):
@@ -103,8 +106,8 @@ class Connect4GUI:
             print("Player " + str(winner) + " wins!")
 
             # Create a new board image to avoid overlapping with existing circles
-            self.board_image = np.ones((self.connect4_game.get_height() * self.square_size,
-                                        self.connect4_game.get_width() * self.square_size, 3), np.uint8)
+            self.board_image = np.full((self.connect4_game.get_height() * self.square_size,
+                                        self.connect4_game.get_width() * self.square_size, 3),self.black_background, dtype= np.uint8)
 
             # Draw the winning move
             self.draw_winning_move(winner)
@@ -113,10 +116,15 @@ class Connect4GUI:
             self.draw_result_message("Player " + str(winner) + " wins!", text_color)
 
             cv2.imshow(self.window_name, self.board_image)
-            cv2.waitKey(3000)
-
+            self.not_move = 1
+            cv2.waitKey(5000)
+            self.not_move = 0
             # cv2.destroyAllWindows()
 
+            self.board_image = np.full((connect4_game.get_height()*self.square_size, connect4_game.get_width()*self.square_size,3),self.black_background,
+                                        dtype = np.uint8)
+            cv2.destroyAllWindows()
+            
             self.connect4_game.restart()  # Restart the game
 
             # Create a new Connect4GUI instance with the updated board
@@ -135,18 +143,24 @@ class Connect4GUI:
 
             # Create a new board image to avoid overlapping with existing circles
             self.board_image = np.ones((self.connect4_game.get_height() * self.square_size,
-                                        self.connect4_game.get_width() * self.square_size, 3), np.uint8)
+                                        self.connect4_game.get_width() * self.square_size, 3),dtype=np.uint8)
 
             # Draw the draw message
             self.draw_result_message("It's a draw!")
 
             cv2.imshow(self.window_name, self.board_image)
-            cv2.waitKey(3000)
-
+            self.not_move = 1
+            cv2.waitKey(5000)
+            self.not_move = 0
             # cv2.destroyAllWindows()
+            
+            self.board_image = np.ones((self.connect4_game.get_height()*self.square_size, self.connect4_game.get_width()*self.square_size,3)
+                                       ,dtype = np.uint8)
+           
+            cv2.destroyAllWindows()
 
             self.connect4_game.restart()
-
+            
             # Create a new Connect4GUI instance with the updated board
             updated_gui = Connect4GUI(self.connect4_game)
             updated_gui.board_image = self.board_image
