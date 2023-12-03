@@ -4,9 +4,11 @@ import mediapipe as mp
 import time
 import pyrealsense2 as rs
 import numpy as np
+import connect4_gui
 
 cameraId = 0 # give a specific camera id connected to the computer
-connect4game = connect4.connect4(10,7) #testing class connection
+connect4game = connect4.connect4(7,6) #testing class connection
+GUI = connect4_gui.Connect4GUI(connect4game)
 
 slideWindowCounter = 0
 pointUpCounter = 0
@@ -14,11 +16,13 @@ thumbUpCounter = 0
 thumbDownCounter = 0
 openPalmCounter = 0
 
+cx = 0
+
 mpHands = mp.solutions.hands
 hands = mpHands.Hands(static_image_mode=False,
-                      max_num_hands=2,
-                      min_detection_confidence=0.5,
-                      min_tracking_confidence=0.5)
+                    max_num_hands=2,
+                    min_detection_confidence=0.5,
+                    min_tracking_confidence=0.5)
 mpDraw = mp.solutions.drawing_utils
 
 BaseOptions = mp.tasks.BaseOptions
@@ -27,13 +31,15 @@ GestureRecognizerOptions = mp.tasks.vision.GestureRecognizerOptions
 GestureRecognizerResult = mp.tasks.vision.GestureRecognizerResult
 VisionRunningMode = mp.tasks.vision.RunningMode
 
+last_result = 0
+
 def rsOpen():#open the realsense camera
     # Configure depth and color streams
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30) # depth stream
-    config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30) # color stream
-
+    # config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30) # color stream
+    config.enable_stream(rs.stream.color, 1920, 1080, rs.format.bgr8, 30) # color stream
     # Start streaming
     pipeline.start(config)
     return pipeline
@@ -46,6 +52,8 @@ def print_result(result: GestureRecognizerResult, output_image: mp.Image, timest
     global openPalmCounter
     global pointUpCounter
     global slideWindowCounter
+    global last_result
+    global cx
 
     for gesture in result.gestures:
         # checking for a certain case
@@ -57,6 +65,8 @@ def print_result(result: GestureRecognizerResult, output_image: mp.Image, timest
             openPalmCounter +=1
         elif [category.category_name for category in gesture]==['Pointing_Up']:
             pointUpCounter +=1
+            # GUI.pointting_up_track(cx-260)
+            GUI.pointting_up_track(cx)
         
         # window counter ++
         slideWindowCounter+=1
@@ -65,12 +75,19 @@ def print_result(result: GestureRecognizerResult, output_image: mp.Image, timest
         if slideWindowCounter == 15:
             if thumbUpCounter>thumbDownCounter and thumbUpCounter>pointUpCounter and thumbUpCounter > openPalmCounter:
                 print("Thumb_Up")
+                if last_result!=1:
+                    last_result = 1
+                    GUI.thumb_up_event()
             elif thumbDownCounter>thumbUpCounter and thumbDownCounter>openPalmCounter and thumbDownCounter>pointUpCounter:
                 print("Thumb_Down")
+                if last_result!=2:
+                    last_result = 2
             elif openPalmCounter>thumbDownCounter and openPalmCounter > thumbUpCounter and openPalmCounter > pointUpCounter:
                 print("Open_Palm")
             elif pointUpCounter>thumbDownCounter and pointUpCounter>thumbUpCounter and pointUpCounter>openPalmCounter:
                 print("Point_up")
+                if last_result!=0:
+                    last_result = 0
             else:
                 print("None")
 
@@ -145,11 +162,14 @@ try:
     while True:
         # Wait for a coherent pair of frames: depth and color
             frames = pipeline.wait_for_frames()
-            depth_frame = frames.get_depth_frame()
+            # depth_frame = frames.get_depth_frame()
             color_frame = frames.get_color_frame()
             if not depth_frame or not color_frame:
                 continue
+            # if not color_frame:
+            #     continue
             frame = np.asanyarray(color_frame.get_data())
+            
             
             if frame is not None:
                 frameRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -171,19 +191,19 @@ try:
                                 # print(cx,cy)
                                 cv2.circle(frame, (cx,cy), 3, (255,0,255), cv2.FILLED)
                         mpDraw.draw_landmarks(frame, handLms, mpHands.HAND_CONNECTIONS)
-            # cTime = time.time()
-            # fps = 1 / (cTime - pTime)
-            # pTime = cTime
-            # cv2.putText(frame, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
+                        
+            key = cv2.waitKey(1)
+            GUI.draw_board()
             cv2.imshow('camera', frame)  # show the frame
 
 
-            key = cv2.waitKey(1)
+            # key = cv2.waitKey(1)
             # Press esc or 'q' to close the image window
-            if key & 0xFF == ord('q') or key == 27:
-                cv2.destroyAllWindows()
+            if(key == 27 or key == ord('q')):
                 break
+            
 finally:
     pipeline.stop()
+    cv2.destroyAllWindows()
 
 
