@@ -5,9 +5,9 @@ import random
 import torch
 import time
 
-# model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
 
-model = torch.hub.load('ultralytics/yolov5', 'yolov5l6')
+# model = torch.hub.load('ultralytics/yolov5', 'yolov5l6')
 model.conf = 0.4
 
 def get_mid_pos(frame,box,depth_data,randnum):
