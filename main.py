@@ -127,6 +127,8 @@ class handDetector():
 # start video stream
 capture = cv2.VideoCapture(cameraId) 
 cv2.namedWindow('capture', cv2.WINDOW_NORMAL)  # open a window to show
+capture.set(cv2.CAP_PROP_FRAME_WIDTH,1920)
+capture.set(cv2.CAP_PROP_FRAME_HEIGHT,1080)
 detector = handDetector()
 timestamp = 0
 while capture.isOpened():
@@ -149,7 +151,7 @@ while capture.isOpened():
                         if id == 8:
                             h, w, c = frame.shape
                             cx, cy = int(lm.x *w), int(lm.y*h)
-                            # print(cx)
+                            print(cx)
                             cv2.circle(frame, (cx,cy), 3, (255,0,255), cv2.FILLED)
                     mpDraw.draw_landmarks(frame, handLms, mpHands.HAND_CONNECTIONS)
         
